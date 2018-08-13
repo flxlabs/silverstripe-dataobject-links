@@ -1,0 +1,12 @@
+---
+Name: dataobjectlinkmodule
+After:
+  - '#cmsmodals'
+---
+SilverStripe\Admin\LeftAndMain:
+  extensions:
+    - FLXLabs\DataObjectLink\DataObjectLinkExtension
+
+SilverStripe\Admin\ModalController:
+  extensions:
+    - FLXLabs\DataObjectLink\DataObjectLinkModalExtension

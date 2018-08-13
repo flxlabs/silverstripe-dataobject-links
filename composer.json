@@ -1,0 +1,30 @@
+{
+  "name": "flxlabs/silverstripe-dataobject-links",
+  "description": "Adds links to data objects in TinyMCE editor",
+  "type": "silverstripe-vendormodule",
+  "keywords": [
+    "silverstripe",
+    "cms",
+    "tinymce"
+  ],
+  "license": "BSD-3-Clause",
+  "authors": [{
+    "name": "Marco Crespi",
+    "email": "mrc@flxlabs.com"
+  }],
+  "require": {
+    "silverstripe/cms": "4.x"
+  },
+  "autoload": {
+    "psr-4": {
+      "FLXLabs\\DataObjectLink\\": "src/"
+    }
+  },
+  "extra": {
+    "expose": [
+      "client/dist"
+    ]
+  },
+  "prefer-stable": true,
+  "minimum-stability": "stable"
+}

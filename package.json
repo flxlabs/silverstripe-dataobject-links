@@ -1,0 +1,49 @@
+{
+  "name": "silverstripe-dataobject-links",
+  "version": "1.0.0",
+  "description": "Adds links to data objects in TinyMCE editor",
+  "author": "FLXLabs",
+  "license": "BSD-3-Clause",
+  "scripts": {
+    "build": "npm i && NODE_ENV=production webpack -p --bail --progress",
+    "dev": "NODE_ENV=development webpack --progress",
+    "watch": "NODE_ENV=development webpack --watch --progress",
+    "css": "WEBPACK_CHILD=css npm run build",
+    "lint": "eslint client/src && sass-lint -v"
+  },
+  "resolutions": {
+    "eslint": "^4.6.1"
+  },
+  "babel": {
+    "presets": [
+      "env",
+      "react"
+    ],
+    "plugins": [
+      "transform-object-rest-spread"
+    ]
+  },
+  "devDependencies": {
+    "@silverstripe/eslint-config": "0.0.4",
+    "@silverstripe/webpack-config": "^0.10.0",
+    "webpack": "^4.16.5",
+    "webpack-cli": "^3.1.0"
+  },
+  "dependencies": {
+    "babel-loader": "^7.1.5",
+    "babel-polyfill": "^6.26.0",
+    "bootstrap": "^4.1.3",
+    "classnames": "^2.2.6",
+    "deep-freeze-strict": "^1.1.1",
+    "graphql-tag": "^2.9.2",
+    "jquery": "^3.3.1",
+    "react": "^16.4.2",
+    "react-apollo": "^2.1.9",
+    "react-dom": "^16.4.2",
+    "react-redux": "^5.0.7",
+    "react-select": "^2.0.0",
+    "reactstrap": "^6.3.1",
+    "redux": "^4.0.0",
+    "redux-form": "^7.4.2"
+  }
+}
