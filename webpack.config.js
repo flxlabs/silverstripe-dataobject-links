@@ -20,6 +20,7 @@ const config = [{
 	name: 'js',
 	entry: {
 		'TinyMCE_sslink-dataobject': `${PATHS.SRC}/TinyMCE_sslink-dataobject.jsx`,
+		'sslink-dataobject-transforms': `${PATHS.SRC}/sslink-dataobject-transforms.js`,
 	},
 	output: {
 		path: PATHS.DIST,
