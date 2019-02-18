@@ -20,9 +20,11 @@ class DataObjectLinkExtension extends Extension {
 		if (!isset($arguments['id']) || !is_numeric($arguments['id']) || !isset($arguments['clazz'])) {
 			return null;
 		}
+		
+		$class = str_replace('/', '\\', $arguments['clazz']);
 
-		if (!($obj = DataObject::get_by_id($arguments['clazz'], $arguments['id']))
-			&& !($obj = Versioned::get_latest_version($arguments['clazz'], $arguments['id']))
+		if (!($obj = DataObject::get_by_id($class, $arguments['id']))
+			&& !($obj = Versioned::get_latest_version($class, $arguments['id']))
 		) {
 			return null; // There were no suitable matches at all.
 		}
