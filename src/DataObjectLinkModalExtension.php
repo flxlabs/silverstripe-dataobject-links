@@ -48,6 +48,11 @@ class DataObjectLinkModalExtension extends Extension
         if (!$classes) {
             $classes = [];
         }
+        $sanitizeClasses = [];
+        foreach ($classes as $cl => $name) {
+            $key = str_replace('\\', '_', $cl);
+            $sanitizeClasses[$key] = $name;
+        }
 
         $text = $this->getOwner()->getRequest()->getVar('Text');
         $class = $this->getOwner()->getRequest()->getVar('ClassName');
@@ -60,7 +65,7 @@ class DataObjectLinkModalExtension extends Extension
             'editorDataObjectLink',
             [
                 'RequireLinkText' => isset($showLinkText) || isset($text),
-                'AllowedClasses' => $classes,
+                'AllowedClasses' => $sanitizeClasses,
                 'ClassName' => $class ? $class : null,
                 'ObjectID' => $objId ? $objId : null,
                 'Description' => $descr ? $descr : null,

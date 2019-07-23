@@ -33,7 +33,7 @@ class DataObjectLinkFormFactory extends LinkFormFactory
                 'ClassName',
                 _t(__CLASS__.'.SELECT_OBJECT', 'Select a type'),
                 $context['AllowedClasses'],
-                $context['ClassName']
+                str_replace("_", "\\", $context['ClassName'])
             )
                 ->setHasEmptyDefault(true),
             TextField::create(
@@ -53,8 +53,8 @@ class DataObjectLinkFormFactory extends LinkFormFactory
                 'ClassName',
                 DropdownField::create(
                     'ObjectID',
-                    _t(__CLASS__.'.SELECT_OBJECT', 'Select a ' . $context['ClassName']),
-                    $context['ClassName']::get()->Map('ID', 'Title'),
+                    _t(__CLASS__.'.SELECT_OBJECT', 'Select an object'),
+                    str_replace("_", "\\", $context['ClassName'])::get()->Map('ID', 'Title'),
                     $context['ObjectID']
                 )->setHasEmptyDefault(true)
             );
