@@ -49,14 +49,16 @@ class DataObjectLinkModalExtension extends Extension
             $classes = [];
         }
         $sanitizeClasses = [];
-        foreach ($classes as $cl => $name) {
+        foreach ($classes as $cl => $data) {
             $key = str_replace('\\', '_', $cl);
-            $sanitizeClasses[$key] = $name;
+            $sanitizeClasses[$key] = $data['name'];
         }
 
         $text = $this->getOwner()->getRequest()->getVar('Text');
         $class = $this->getOwner()->getRequest()->getVar('ClassName');
         $objId = $this->getOwner()->getRequest()->getVar('ObjectID');
+        $dependantClass = $this->getOwner()->getRequest()->getVar('DependantClassName');
+        $depdendantObjId = $this->getOwner()->getRequest()->getVar('DependantObjectID');
         $descr = $this->getOwner()->getRequest()->getVar('Description');
         $targetBlank = $this->getOwner()->getRequest()->getVar('TargetBlank');
         
@@ -68,6 +70,8 @@ class DataObjectLinkModalExtension extends Extension
                 'AllowedClasses' => $sanitizeClasses,
                 'ClassName' => $class ? $class : null,
                 'ObjectID' => $objId ? $objId : null,
+                'DependantClassName' => $dependantClass ? $dependantClass : null,
+                'DependantObjectID' => $depdendantObjId ? $depdendantObjId : null,
                 'Description' => $descr ? $descr : null,
                 'TargetBlank' => $targetBlank ? $targetBlank : null,
             ]
