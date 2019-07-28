@@ -56,18 +56,22 @@ class DataObjectLinkFormFactory extends LinkFormFactory
             $rc = singleton($className);
             $sort = "Title";
 
-            if ($classConfig["sort"]) {
+            if (isset($classConfig["sort"]) && $classConfig["sort"]) {
                 $sort = $classConfig["sort"];
             }
-            if ($rc->hasMethod("getObjectSelectorTitle")) {
-                $titleField = 'getObjectSelectorTitle';
+            if (isset($classConfig["display_field"]) && $classConfig["display_field"]) {
+                $titleField = $classConfig["display_field"];
+            }
+            $values = $className::get()->sort($sort);
+            if (isset($classConfig["filter"]) && $classConfig["filter"]) {
+                $values = $values->where($classConfig["filter"]);
             }
             $fields->insertAfter(
                 'ClassName',
                 DropdownField::create(
                     'ObjectID',
                     _t(__CLASS__.'.SELECT_OBJECT', 'Select an object'),
-                    $className::get()->sort($sort)->Map('ID', $titleField),
+                    $values->Map('ID', $titleField),
                     $context['ObjectID']
                 )->setHasEmptyDefault(true)
             );
@@ -78,7 +82,6 @@ class DataObjectLinkFormFactory extends LinkFormFactory
             $dependantClass = $this->getClassConfig(str_replace("_", "\\", $context['ClassName']));
             if ($dependantClass && $dependantClass["dependant_class"]) {
                 $titleField = 'Title';
-                $rc = singleton($dependantClass["dependant_class"]);
 
                 if ($rc->hasMethod("getObjectSelectorTitle")) {
                     $titleField = 'getObjectSelectorTitle';
