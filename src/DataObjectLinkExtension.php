@@ -8,31 +8,33 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
 
 class DataObjectLinkExtension extends Extension {
-	public function updateClientConfig(&$clientConfig)
-	{
-		$clientConfig['form']['editorDataObjectLink'] = [
-			'schemaUrl' => $this->getOwner()->Link('methodSchema/Modals/editorDataObjectLink')
-		];
-	}
+    public function updateClientConfig(&$clientConfig)
+    {
+        $clientConfig['form']['editorDataObjectLink'] = [
+            'schemaUrl' => $this->getOwner()->Link('methodSchema/Modals/editorDataObjectLink')
+        ];
+    }
 
-	public static function link_shortcode_handler($arguments, $content = null, $parser = null)
-	{
-		if (!isset($arguments['id']) || !is_numeric($arguments['id']) || !isset($arguments['clazz'])) {
-			return null;
-		}
+    public static function link_shortcode_handler($arguments, $content = null, $parser = null)
+    {
+        if (!isset($arguments['id']) || !is_numeric($arguments['id']) || !isset($arguments['clazz'])) {
+            return null;
+        }
 
-		if (!($obj = DataObject::get_by_id($arguments['clazz'], $arguments['id']))
-			&& !($obj = Versioned::get_latest_version($arguments['clazz'], $arguments['id']))
-		) {
-			return null; // There were no suitable matches at all.
-		}
+        $class = str_replace('_', '\\', $arguments['clazz']);
 
-		$link = Convert::raw2att($obj->Link());
+        if (!($obj = DataObject::get_by_id($class, $arguments['id']))
+            && !($obj = Versioned::get_latest_version($class, $arguments['id']))
+        ) {
+            return null; // There were no suitable matches at all.
+        }
 
-		if ($content) {
-			return sprintf('<a href="%s">%s</a>', $link, $parser->parse($content));
-		} else {
-			return $link;
-		}
-	}
+        $link = Convert::raw2att($obj->Link());
+
+        if ($content) {
+            return sprintf('<a href="%s">%s</a>', $link, $parser->parse($content));
+        } else {
+            return $link;
+        }
+    }
 }

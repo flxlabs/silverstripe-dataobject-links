@@ -6,6 +6,7 @@ use SilverStripe\Admin\Forms\LinkFormFactory;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Control\RequestHandler;
+use SilverStripe\Core\Config\Config;
 use SilverStripe\Forms\FormAction;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\FieldList;
@@ -33,7 +34,7 @@ class DataObjectLinkFormFactory extends LinkFormFactory
                 'ClassName',
                 _t(__CLASS__.'.SELECT_OBJECT', 'Select a type'),
                 $context['AllowedClasses'],
-                $context['ClassName']
+                str_replace("_", "\\", $context['ClassName'])
             )
                 ->setHasEmptyDefault(true),
             TextField::create(
@@ -49,15 +50,56 @@ class DataObjectLinkFormFactory extends LinkFormFactory
         ]);
 
         if ($context['ClassName']) {
+            $className = str_replace("_", "\\", $context['ClassName']);
+            $classConfig = $this->getClassConfig($className);
+            $titleField = 'Title';
+            $rc = singleton($className);
+            $sort = "Title";
+
+            if (isset($classConfig["sort"]) && $classConfig["sort"]) {
+                $sort = $classConfig["sort"];
+            }
+            if (isset($classConfig["display_field"]) && $classConfig["display_field"]) {
+                $titleField = $classConfig["display_field"];
+            }
+            $values = $className::get()->sort($sort);
+            if (isset($classConfig["filter"]) && $classConfig["filter"]) {
+                $values = $values->where($classConfig["filter"]);
+            }
             $fields->insertAfter(
                 'ClassName',
                 DropdownField::create(
                     'ObjectID',
-                    _t(__CLASS__.'.SELECT_OBJECT', 'Select a ' . $context['ClassName']),
-                    $context['ClassName']::get()->Map('ID', 'Title'),
+                    _t(__CLASS__.'.SELECT_OBJECT', 'Select an object'),
+                    $values->Map('ID', $titleField),
                     $context['ObjectID']
                 )->setHasEmptyDefault(true)
             );
+        }
+
+        if ($context['ObjectID']) {
+            // Check if there is a dependant class
+            $dependantClass = $this->getClassConfig(str_replace("_", "\\", $context['ClassName']));
+            if ($dependantClass && $dependantClass["dependant_class"]) {
+                $titleField = 'Title';
+
+                if ($rc->hasMethod("getObjectSelectorTitle")) {
+                    $titleField = 'getObjectSelectorTitle';
+                }
+
+                $objects = $dependantClass["dependant_class"]::get()->filter([$dependantClass["dependant_field"] => $context['ObjectID']])->Map('ID', $titleField);
+                $fields->insertAfter(
+                    'ObjectID',
+                    DropdownField::create(
+                        'DependantObjectID',
+                        _t(__CLASS__.'.SELECT_DEPENDANT_OBJECT', 'Select a dependant object'),
+                        $objects,
+                        $context['DependantObjectID']
+                    )->setHasEmptyDefault(true)
+                );
+
+            }
+
         }
 
         if ($context['RequireLinkText']) {
@@ -77,5 +119,15 @@ class DataObjectLinkFormFactory extends LinkFormFactory
         }
 
         return RequiredFields::create('ClassName', 'ObjectID');
+    }
+
+    protected function getClassConfig($class) {
+        $classes = Config::inst()->get(
+            DataObjectLinkModalExtension::class,
+            'classes',
+            Config::EXCLUDE_EXTRA_SOURCES
+        );
+
+        return $classes[$class];
     }
 }
