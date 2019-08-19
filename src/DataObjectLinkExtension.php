@@ -1,13 +1,14 @@
 <?php
+
 namespace FLxLabs\DataObjectLink;
 
 use SilverStripe\Core\Extension;
 use SilverStripe\Core\Convert;
-use SilverStripe\View\Requirements;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
 
-class DataObjectLinkExtension extends Extension {
+class DataObjectLinkExtension extends Extension
+{
 	public function updateClientConfig(&$clientConfig)
 	{
 		$clientConfig['form']['editorDataObjectLink'] = [
@@ -21,8 +22,11 @@ class DataObjectLinkExtension extends Extension {
 			return null;
 		}
 
-		if (!($obj = DataObject::get_by_id($arguments['clazz'], $arguments['id']))
-			&& !($obj = Versioned::get_latest_version($arguments['clazz'], $arguments['id']))
+		$class = str_replace('_', '\\', $arguments['clazz']);
+
+		if (
+			!($obj = DataObject::get_by_id($class, $arguments['id']))
+			&& !($obj = Versioned::get_latest_version($class, $arguments['id']))
 		) {
 			return null; // There were no suitable matches at all.
 		}

@@ -30,12 +30,9 @@ const plugin = {
 };
 
 const modalId = 'insert-link__dialog-wrapper--dataobject';
-const sectionConfigKey =
-	'SilverStripe\\CMS\\Controllers\\CMSPageEditController';
+const sectionConfigKey = 'SilverStripe\\CMS\\Controllers\\CMSPageEditController';
 const formName = 'editorDataObjectLink';
-const InsertLinkDataObjectModal = provideInjector(
-	createInsertLinkModal(sectionConfigKey, formName)
-);
+const InsertLinkDataObjectModal = provideInjector(createInsertLinkModal(sectionConfigKey, formName));
 
 jQuery.entwine('ss', $ => {
 	$('textarea.htmleditor').entwine({
@@ -135,11 +132,7 @@ jQuery.entwine('ss', $ => {
 			}
 
 			// check if page is safe
-			const shortcode = ShortcodeSerialiser.match(
-				'dataobject_link',
-				false,
-				href
-			);
+			const shortcode = ShortcodeSerialiser.match('dataobject_link', false, href);
 			if (!shortcode) {
 				return {};
 			}
@@ -149,9 +142,7 @@ jQuery.entwine('ss', $ => {
 
 			return {
 				ClassName: clazz,
-				ObjectID: shortcode.properties.id
-					? parseInt(shortcode.properties.id, 10)
-					: 0,
+				ObjectID: shortcode.properties.id ? parseInt(shortcode.properties.id, 10) : 0,
 				Description: node.attr('title'),
 				TargetBlank: !!node.attr('target')
 			};

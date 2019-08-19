@@ -24,8 +24,11 @@ In your settings `.yml` file put a section with
 ```yaml
 FLxLabs\DataObjectLink\DataObjectLinkModalExtension:
   classes:
-    Team: Team
+    Team:
+      name: Team
     Player: Player
+      name: Player
+      sort: Title
 ```
 
 Where `classes` is a map from ClassName to display name that is used when selecting the DataObject.
