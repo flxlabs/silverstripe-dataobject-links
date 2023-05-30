@@ -10,7 +10,7 @@ Using this module you can link to DataObjects from within TinyMCE.
 
 You can either add this module to your composer file using
 
-```
+```sh
 composer require flxlabs/silverstripe-dataobject-links
 ```
 

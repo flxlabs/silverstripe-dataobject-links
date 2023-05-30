@@ -29,7 +29,7 @@ class DataObjectLinkFormFactory extends LinkFormFactory
 				'ClassName',
 				_t(__CLASS__ . '.SELECT_OBJECT', 'Select a type'),
 				$context['AllowedClasses'],
-				str_replace("_", "\\", $context['ClassName'])
+				str_replace("_", "\\", $context['ClassName'] ?? '')
 			)
 				->setHasEmptyDefault(true),
 			TextField::create(
@@ -45,7 +45,7 @@ class DataObjectLinkFormFactory extends LinkFormFactory
 		]);
 
 		if ($context['ClassName']) {
-			$className = str_replace("_", "\\", $context['ClassName']);
+			$className = str_replace("_", "\\", $context['ClassName'] ?? '');
 			$classConfig = $this->getClassConfig($className);
 			$titleField = 'Title';
 			$rc = singleton($className);
@@ -74,7 +74,7 @@ class DataObjectLinkFormFactory extends LinkFormFactory
 
 		if ($context['ObjectID']) {
 			// Check if there is a dependant class
-			$dependantClass = $this->getClassConfig(str_replace("_", "\\", $context['ClassName']));
+			$dependantClass = $this->getClassConfig(str_replace("_", "\\", $context['ClassName'] ?? ''));
 			if ($dependantClass && $dependantClass["dependant_class"]) {
 				$titleField = 'Title';
 

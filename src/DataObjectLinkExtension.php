@@ -5,7 +5,6 @@ namespace FLxLabs\DataObjectLink;
 use SilverStripe\Core\Extension;
 use SilverStripe\Core\Convert;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\Versioned\Versioned;
 
 class DataObjectLinkExtension extends Extension
 {
@@ -22,13 +21,15 @@ class DataObjectLinkExtension extends Extension
 			return null;
 		}
 
-		$class = str_replace('_', '\\', $arguments['clazz']);
+		$class = str_replace('_', '\\', $arguments['clazz'] ?? '');
 
-		if (
-			!($obj = DataObject::get_by_id($class, $arguments['id']))
-			&& !($obj = Versioned::get_latest_version($class, $arguments['id']))
-		) {
-			return null; // There were no suitable matches at all.
+		if (!($obj = DataObject::get_by_id($class, $arguments['id']))) {
+			if (class_exists('SilverStripe\Versioned\Versioned')) {
+				$obj = SilverStripe\Versioned\Versioned::get_latest_version($class, $arguments['id']);
+			}
+			if (!$obj) {
+				return null; // There were no suitable matches at all.
+			}
 		}
 
 		$link = Convert::raw2att($obj->Link());

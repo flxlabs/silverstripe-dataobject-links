@@ -8,12 +8,16 @@
     "tinymce"
   ],
   "license": "BSD-3-Clause",
-  "authors": [{
-    "name": "Marco Crespi",
-    "email": "mrc@flxlabs.com"
-  }],
+  "authors": [
+    {
+      "name": "Marco Crespi",
+      "email": "mrc@flxlabs.com"
+    }
+  ],
   "require": {
-    "silverstripe/cms": "4.x"
+    "silverstripe/framework": "^5",
+    "silverstripe/admin": "^2",
+    "silverstripe/vendor-plugin": "^2.0"
   },
   "autoload": {
     "psr-4": {
@@ -26,5 +30,11 @@
     ]
   },
   "prefer-stable": true,
-  "minimum-stability": "stable"
+  "minimum-stability": "stable",
+  "config": {
+    "allow-plugins": {
+      "composer/installers": true,
+      "silverstripe/vendor-plugin": true
+    }
+  }
 }
