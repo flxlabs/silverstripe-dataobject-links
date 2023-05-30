@@ -49,7 +49,7 @@ class DataObjectLinkModalExtension extends Extension
 		}
 		$sanitizeClasses = [];
 		foreach ($classes as $cl => $data) {
-			$key = str_replace('\\', '_', $cl);
+			$key = str_replace('\\', '_', $cl ?? '');
 			$sanitizeClasses[$key] = $data['name'];
 		}
 

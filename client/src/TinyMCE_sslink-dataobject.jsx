@@ -3,7 +3,7 @@ import i18n from 'i18n';
 import TinyMCEActionRegistrar from 'lib/TinyMCEActionRegistrar';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { ApolloProvider } from 'react-apollo';
+import { ApolloProvider } from '@apollo/client';
 import { Provider } from 'react-redux';
 import jQuery from 'jquery';
 import ShortcodeSerialiser from 'lib/ShortcodeSerialiser';
@@ -15,8 +15,8 @@ const commandName = 'sslinkdataobject';
 // Link to a dataobject
 TinyMCEActionRegistrar.addAction('sslink', {
 	text: i18n._t('CMS.LINKLABEL_PAGE', 'Link to an Object'),
-	onclick: editor => editor.execCommand(commandName),
-	priority: 53
+	onclick: (editor) => editor.execCommand(commandName),
+	priority: 53,
 }).addCommandWithUrlTest(commandName, /^\[dataobject_link.+]$/);
 
 const plugin = {
@@ -26,7 +26,7 @@ const plugin = {
 
 			field.openLinkDataObjectDialog();
 		});
-	}
+	},
 };
 
 const modalId = 'insert-link__dialog-wrapper--dataobject';
@@ -34,7 +34,7 @@ const sectionConfigKey = 'SilverStripe\\CMS\\Controllers\\CMSPageEditController'
 const formName = 'editorDataObjectLink';
 const InsertLinkDataObjectModal = provideInjector(createInsertLinkModal(sectionConfigKey, formName));
 
-jQuery.entwine('ss', $ => {
+jQuery.entwine('ss', ($) => {
 	$('textarea.htmleditor').entwine({
 		openLinkDataObjectDialog() {
 			let dialog = $(`#${modalId}`);
@@ -47,13 +47,14 @@ jQuery.entwine('ss', $ => {
 
 			dialog.setElement(this);
 			dialog.open();
-		}
+		},
 	});
 
 	/**
 	 * Assumes that $('.insert-link__dialog-wrapper').entwine({}); is defined for shared functions
 	 */
 	$(`#${modalId}`).entwine({
+		ReactRoot: null,
 		renderModal(isOpen) {
 			const store = ss.store;
 			const client = ss.apolloClient;
@@ -62,8 +63,15 @@ jQuery.entwine('ss', $ => {
 			const attrs = this.getOriginalAttributes();
 			const requireLinkText = this.getRequireLinkText();
 
+			let root = this.getReactRoot();
+			if (root) {
+				// Previous root is still present. Unmount it.
+				root.unmount();
+				this.setReactRoot(null);
+			}
+			root = ReactDOM.createRoot(this[0]);
 			// create/update the react component
-			ReactDOM.render(
+			root.render(
 				<ApolloProvider client={client}>
 					<Provider store={store}>
 						<InsertLinkDataObjectModal
@@ -81,8 +89,8 @@ jQuery.entwine('ss', $ => {
 						/>
 					</Provider>
 				</ApolloProvider>,
-				this[0]
 			);
+			this.setReactRoot(root);
 		},
 
 		/**
@@ -91,9 +99,7 @@ jQuery.entwine('ss', $ => {
 		 * @return {Boolean}
 		 */
 		getRequireLinkText() {
-			const selection = this.getElement()
-				.getEditor()
-				.getInstance().selection;
+			const selection = this.getElement().getEditor().getInstance().selection;
 			const selectionContent = selection.getContent() || '';
 			const tagName = selection.getNode().tagName;
 			const requireLinkText = tagName !== 'A' && selectionContent.trim() === '';
@@ -111,9 +117,9 @@ jQuery.entwine('ss', $ => {
 			const shortcode = ShortcodeSerialiser.serialise(
 				{
 					name: 'dataobject_link',
-					properties: { clazz: data.ClassName, id: data.ObjectID }
+					properties: { clazz: data.ClassName, id: data.ObjectID },
 				},
-				true
+				true,
 			);
 
 			attributes.href = shortcode;
@@ -144,13 +150,13 @@ jQuery.entwine('ss', $ => {
 				ClassName: clazz,
 				ObjectID: shortcode.properties.id ? parseInt(shortcode.properties.id, 10) : 0,
 				Description: node.attr('title'),
-				TargetBlank: !!node.attr('target')
+				TargetBlank: !!node.attr('target'),
 			};
-		}
+		},
 	});
 });
 
 // Adds the plugin class to the list of available TinyMCE plugins
-tinymce.PluginManager.add(commandName, editor => plugin.init(editor));
+tinymce.PluginManager.add(commandName, (editor) => plugin.init(editor));
 
 export default plugin;
