@@ -25,7 +25,7 @@ class DataObjectLinkExtension extends Extension
 
 		if (!($obj = DataObject::get_by_id($class, $arguments['id']))) {
 			if (class_exists('SilverStripe\Versioned\Versioned')) {
-				$obj = SilverStripe\Versioned\Versioned::get_latest_version($class, $arguments['id']);
+				$obj = \SilverStripe\Versioned\Versioned::get_latest_version($class, $arguments['id']);
 			}
 			if (!$obj) {
 				return null; // There were no suitable matches at all.
