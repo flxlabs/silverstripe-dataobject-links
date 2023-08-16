@@ -22,6 +22,9 @@ class DataObjectLinkExtension extends Extension
 		}
 
 		$class = str_replace('_', '\\', $arguments['clazz'] ?? '');
+		if (!class_exists($class)) {
+				return null;
+		}
 
 		if (!($obj = DataObject::get_by_id($class, $arguments['id']))) {
 			if (class_exists('SilverStripe\Versioned\Versioned')) {
