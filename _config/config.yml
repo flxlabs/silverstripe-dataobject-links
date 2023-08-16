@@ -6,6 +6,7 @@ After:
 SilverStripe\Admin\LeftAndMain:
   extra_requirements_javascript:
     - 'vendor/flxlabs/silverstripe-dataobject-links/client/dist/js/sslink-dataobject-transforms.js'
+    - 'vendor/flxlabs/silverstripe-dataobject-links : client/dist/js/de.js'
   extensions:
     - FLXLabs\DataObjectLink\DataObjectLinkExtension
 
