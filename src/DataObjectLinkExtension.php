@@ -2,6 +2,7 @@
 
 namespace FLxLabs\DataObjectLink;
 
+use SilverStripe\Admin\ModalController;
 use SilverStripe\Core\Extension;
 use SilverStripe\Core\Convert;
 use SilverStripe\ORM\DataObject;
@@ -10,8 +11,9 @@ class DataObjectLinkExtension extends Extension
 {
 	public function updateClientConfig(&$clientConfig)
 	{
-		$clientConfig['form']['editorDataObjectLink'] = [
-			'schemaUrl' => $this->getOwner()->Link('methodSchema/Modals/editorDataObjectLink')
+		$modalController = ModalController::singleton();
+		$clientConfig['form']['EditorDataObjectLink'] = [
+			'schemaUrl' => $modalController->Link('linkModalFormSchema/EditorDataObjectLink/0')
 		];
 	}
 
@@ -26,7 +28,7 @@ class DataObjectLinkExtension extends Extension
 				return null;
 		}
 
-		if (!($obj = DataObject::get_by_id($class, $arguments['id']))) {
+		if (!($obj = DataObject::get($class)->setUseCache(true)->byID($arguments['id']))) {
 			if (class_exists('SilverStripe\Versioned\Versioned')) {
 				$obj = \SilverStripe\Versioned\Versioned::get_latest_version($class, $arguments['id']);
 			}

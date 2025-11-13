@@ -14,7 +14,7 @@ use SilverStripe\Core\Config\Config;
 class DataObjectLinkModalExtension extends Extension
 {
 	private static $allowed_actions = array(
-		'editorDataObjectLink',
+		'EditorDataObjectLink',
 	);
 
 	/**
@@ -33,7 +33,7 @@ class DataObjectLinkModalExtension extends Extension
 	 *
 	 * @return Form
 	 */
-	public function editorDataObjectLink()
+	public function EditorDataObjectLink()
 	{
 		$showLinkText = $this->getOwner()->getRequest()->getVar('requireLinkText');
 
@@ -63,7 +63,7 @@ class DataObjectLinkModalExtension extends Extension
 
 		return $factory->getForm(
 			$this->getOwner(),
-			'editorDataObjectLink',
+			'EditorDataObjectLink',
 			[
 				'RequireLinkText' => isset($showLinkText) || isset($text),
 				'AllowedClasses' => $sanitizeClasses,
