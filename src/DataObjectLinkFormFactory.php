@@ -9,7 +9,7 @@ use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\DropdownField;
-use SilverStripe\Forms\RequiredFields;
+use SilverStripe\Forms\Validation\RequiredFieldsValidator;
 
 /**
  * Provides a form factory for inserting dataobject links in a HTML editor
@@ -24,41 +24,72 @@ class DataObjectLinkFormFactory extends LinkFormFactory
 	 */
 	protected function getFormFields($controller, $name, $context)
 	{
+		// Get classes config
+		$classes = Config::inst()->get(
+			DataObjectLinkModalExtension::class,
+			'classes',
+			Config::EXCLUDE_EXTRA_SOURCES
+		);
+		if (!$classes) {
+			$classes = [];
+		}
+		$sanitizeClasses = [];
+		foreach ($classes as $cl => $data) {
+			$key = str_replace('\\', '_', $cl ?? '');
+			$sanitizeClasses[$key] = $data['name'];
+		}
+
+		// Get values from request (for AJAX updates) or context (for initial load)
+		$request = $controller->getRequest();
+		$className = $request->getVar('ClassName') ?: ($context['ClassName'] ?? null);
+		$objId = $request->getVar('ObjectID') ?: ($context['ObjectID'] ?? null);
+		$dependantObjId = $request->getVar('DependantObjectID') ?: ($context['DependantObjectID'] ?? null);
+		$descr = $request->getVar('Description') ?: ($context['Description'] ?? null);
+		$targetBlank = $request->getVar('TargetBlank') ?: ($context['TargetBlank'] ?? null);
+		
+		// Cast IDs to integers if they're numeric strings
+		if ($objId && is_numeric($objId)) {
+			$objId = (int)$objId;
+		}
+		if ($dependantObjId && is_numeric($dependantObjId)) {
+			$dependantObjId = (int)$dependantObjId;
+		}
+
 		$fields = FieldList::create([
 			DropdownField::create(
 				'ClassName',
 				_t(__CLASS__ . '.SELECT_OBJECT', 'Select a type'),
-				$context['AllowedClasses'],
-				str_replace("_", "\\", $context['ClassName'] ?? '')
+				$sanitizeClasses,
+				$className ? str_replace("_", "\\", $className) : null
 			)
 				->setHasEmptyDefault(true),
 			TextField::create(
 				'Description',
 				_t(__CLASS__ . '.LINKDESCR', 'Link description'),
-				$context['Description']
+				$descr
 			),
 			CheckboxField::create(
 				'TargetBlank',
 				_t(__CLASS__ . '.LINKOPENNEWWIN', 'Open in new window/tab'),
-				$context['TargetBlank']
+				$targetBlank
 			),
 		]);
 
-		if ($context['ClassName']) {
-			$className = str_replace("_", "\\", $context['ClassName'] ?? '');
-			$classConfig = $this->getClassConfig($className);
+		if ($className) {
+			$classNameFull = str_replace("_", "\\", $className ?? '');
+			$classConfig = $this->getClassConfig($classNameFull);
 			$titleField = 'Title';
-			$rc = singleton($className);
+			$rc = singleton($classNameFull);
 			$sort = "Title";
 
-			if (isset($classConfig["sort"]) && $classConfig["sort"]) {
+			if ($classConfig && isset($classConfig["sort"]) && $classConfig["sort"]) {
 				$sort = $classConfig["sort"];
 			}
-			if (isset($classConfig["display_field"]) && $classConfig["display_field"]) {
+			if ($classConfig && isset($classConfig["display_field"]) && $classConfig["display_field"]) {
 				$titleField = $classConfig["display_field"];
 			}
-			$values = $className::get()->sort($sort);
-			if (isset($classConfig["filter"]) && $classConfig["filter"]) {
+			$values = $classNameFull::get()->sort($sort);
+			if ($classConfig && isset($classConfig["filter"]) && $classConfig["filter"]) {
 				$values = $values->where($classConfig["filter"]);
 			}
 			$fields->insertAfter(
@@ -67,29 +98,31 @@ class DataObjectLinkFormFactory extends LinkFormFactory
 					'ObjectID',
 					_t(__CLASS__ . '.SELECT_OBJECT', 'Select an object'),
 					$values->Map('ID', $titleField),
-					$context['ObjectID']
+					$objId
 				)->setHasEmptyDefault(true)
 			);
 		}
 
-		if ($context['ObjectID']) {
+		if ($objId) {
 			// Check if there is a dependant class
-			$dependantClass = $this->getClassConfig(str_replace("_", "\\", $context['ClassName'] ?? ''));
-			if ($dependantClass && $dependantClass["dependant_class"]) {
+			$classNameFull = str_replace("_", "\\", $className ?? '');
+			$dependantClassConfig = $this->getClassConfig($classNameFull);
+			if ($dependantClassConfig && isset($dependantClassConfig["dependant_class"])) {
 				$titleField = 'Title';
+				$rc = singleton($classNameFull);
 
 				if ($rc->hasMethod("getObjectSelectorTitle")) {
 					$titleField = 'getObjectSelectorTitle';
 				}
 
-				$objects = $dependantClass["dependant_class"]::get()->filter([$dependantClass["dependant_field"] => $context['ObjectID']])->Map('ID', $titleField);
+				$objects = $dependantClassConfig["dependant_class"]::get()->filter([$dependantClassConfig["dependant_field"] => $objId])->Map('ID', $titleField);
 				$fields->insertAfter(
 					'ObjectID',
 					DropdownField::create(
 						'DependantObjectID',
 						_t(__CLASS__ . '.SELECT_DEPENDANT_OBJECT', 'Select a dependant object'),
 						$objects,
-						$context['DependantObjectID']
+						$dependantObjId
 					)->setHasEmptyDefault(true)
 				);
 			}
@@ -102,16 +135,18 @@ class DataObjectLinkFormFactory extends LinkFormFactory
 			);
 		}
 
+		$this->extend('updateFormFields', $fields, $controller, $name, $context);
+
 		return $fields;
 	}
 
 	protected function getValidator($controller, $name, $context)
 	{
 		if ($context['RequireLinkText']) {
-			return RequiredFields::create('ClassName', 'ObjectID', 'Text');
+			return RequiredFieldsValidator::create('ClassName', 'ObjectID', 'Text');
 		}
 
-		return RequiredFields::create('ClassName', 'ObjectID');
+		return RequiredFieldsValidator::create('ClassName', 'ObjectID');
 	}
 
 	protected function getClassConfig($class)
@@ -122,6 +157,6 @@ class DataObjectLinkFormFactory extends LinkFormFactory
 			Config::EXCLUDE_EXTRA_SOURCES
 		);
 
-		return $classes[$class];
+		return $classes[$class] ?? null;
 	}
 }

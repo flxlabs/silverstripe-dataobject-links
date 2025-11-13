@@ -10,5 +10,7 @@ SilverStripe\Admin\LeftAndMain:
     - FLXLabs\DataObjectLink\DataObjectLinkExtension
 
 SilverStripe\Admin\ModalController:
+  link_modal_form_factories:
+    EditorDataObjectLink: FLXLabs\DataObjectLink\DataObjectLinkFormFactory
   extensions:
     - FLXLabs\DataObjectLink\DataObjectLinkModalExtension
