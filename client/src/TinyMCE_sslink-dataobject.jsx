@@ -4,8 +4,8 @@ import TinyMCEActionRegistrar from 'lib/TinyMCEActionRegistrar';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { createRoot } from 'react-dom/client';
-import { ApolloProvider } from '@apollo/client';
-import { Provider } from 'react-redux';
+//import { ApolloProvider } from '@apollo/client';
+//import { Provider } from 'react-redux';
 import jQuery from 'jquery';
 import ShortcodeSerialiser from 'lib/ShortcodeSerialiser';
 import { createInsertLinkModal } from 'containers/InsertLinkModal/InsertLinkModal';
@@ -35,7 +35,7 @@ const plugin = {
 const modalId = 'insert-link__dialog-wrapper--dataobject';
 //const sectionConfigKey = 'SilverStripe\\CMS\\Controllers\\CMSPageEditController';
 const sectionConfigKey = 'SilverStripe\\Admin\\LeftAndMain';
-const formName = 'editorDataObjectLink';
+const formName = 'EditorDataObjectLink';
 const InsertLinkDataObjectModal = loadComponent(createInsertLinkModal(sectionConfigKey, formName));
 
 jQuery.entwine('ss', ($) => {
@@ -144,13 +144,12 @@ jQuery.entwine('ss', ($) => {
 		getOriginalAttributes() {
 			const editor = this.getElement().getEditor();
 			const node = $(editor.getSelectedNode());
-
 			// Get href
 			const href = node.attr('href') || '';
-			if (!href || !clazz) {
+			if (!href) {
 				return {};
 			}
-
+			
 			// check if page is safe
 			const shortcode = ShortcodeSerialiser.match('dataobject_link', false, href);
 			if (!shortcode) {
@@ -159,7 +158,6 @@ jQuery.entwine('ss', ($) => {
 
 			// Parse class ourselves because shortcode parser sucks
 			const clazz = shortcode.original.match(/clazz=(.*?)\W/)[1];
-
 			return {
 				ClassName: clazz,
 				ObjectID: shortcode.properties.id ? parseInt(shortcode.properties.id, 10) : 0,

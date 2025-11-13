@@ -12,7 +12,7 @@ Injector.transform(
 					ss.store.dispatch({
 						type: '@@redux-form/INITIALIZE',
 						meta: {
-							form: 'Admin.InsertLinkDataObjectModal.editorDataObjectLink',
+							form: 'Admin.InsertLinkDataObjectModal.linkModalForm/EditorDataObjectLink',
 							keepDirty: false,
 							keepSubmitSucceeded: true,
 						},
