@@ -9,7 +9,7 @@ use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\DropdownField;
-use SilverStripe\Forms\RequiredFields;
+use SilverStripe\Forms\Validation\RequiredFieldsValidator;
 
 /**
  * Provides a form factory for inserting dataobject links in a HTML editor
@@ -102,16 +102,18 @@ class DataObjectLinkFormFactory extends LinkFormFactory
 			);
 		}
 
+		$this->extend('updateFormFields', $fields, $controller, $name, $context);
+
 		return $fields;
 	}
 
 	protected function getValidator($controller, $name, $context)
 	{
 		if ($context['RequireLinkText']) {
-			return RequiredFields::create('ClassName', 'ObjectID', 'Text');
+			return RequiredFieldsValidator::create('ClassName', 'ObjectID', 'Text');
 		}
 
-		return RequiredFields::create('ClassName', 'ObjectID');
+		return RequiredFieldsValidator::create('ClassName', 'ObjectID');
 	}
 
 	protected function getClassConfig($class)

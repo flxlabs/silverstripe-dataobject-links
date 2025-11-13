@@ -26,7 +26,7 @@ class DataObjectLinkExtension extends Extension
 				return null;
 		}
 
-		if (!($obj = DataObject::get_by_id($class, $arguments['id']))) {
+		if (!($obj = DataObject::get($class)->setUseCache(true)->byID($arguments['id']))) {
 			if (class_exists('SilverStripe\Versioned\Versioned')) {
 				$obj = \SilverStripe\Versioned\Versioned::get_latest_version($class, $arguments['id']);
 			}

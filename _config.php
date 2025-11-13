@@ -2,11 +2,16 @@
 use SilverStripe\Core\Manifest\ModuleLoader;
 use SilverStripe\Forms\HTMLEditor\HtmlEditorConfig;
 use SilverStripe\View\Parsers\ShortcodeParser;
+use SilverStripe\TinyMCE\TinyMCEConfig;
 
-HtmlEditorConfig::get('cms')->enablePlugins([
-	'sslinkdataobject' => ModuleLoader::getModule('flxlabs/silverstripe-dataobject-links')
+$editorConfig = HTMLEditorConfig::get('cms');
+if ($editorConfig instanceof TinyMCEConfig) {
+    $editorConfig->enablePlugins([
+		'sslinkdataobject' => ModuleLoader::getModule('flxlabs/silverstripe-dataobject-links')
 		->getResource('client/dist/js/TinyMCE_sslink-dataobject.js')
-]);
+	]);
+	$editorConfig->enablePlugins("emoticons");
+}
 
 /**
  * Register handler for our shortcodes
