@@ -133,7 +133,7 @@ jQuery.entwine('ss', ($) => {
 
 			// Get href
 			const href = node.attr('href') || '';
-			if (!href || !clazz) {
+			if (!href) {
 				return {};
 			}
 
@@ -145,12 +145,15 @@ jQuery.entwine('ss', ($) => {
 
 			// Parse class ourselves because shortcode parser sucks
 			const clazz = shortcode.original.match(/clazz=(.*?)\W/)[1];
+			if (!clazz) {
+				return {};
+			}
 
 			return {
 				ClassName: clazz,
 				ObjectID: shortcode.properties.id ? parseInt(shortcode.properties.id, 10) : 0,
 				Description: node.attr('title'),
-				TargetBlank: !!node.attr('target'),
+				TargetBlank: node.attr('target') ? true : undefined,
 			};
 		},
 	});

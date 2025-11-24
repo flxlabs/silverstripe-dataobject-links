@@ -5,6 +5,7 @@ namespace FLxLabs\DataObjectLink;
 use SilverStripe\Admin\Forms\LinkFormFactory;
 use SilverStripe\Control\RequestHandler;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Dev\Debug;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
@@ -72,29 +73,6 @@ class DataObjectLinkFormFactory extends LinkFormFactory
 			);
 		}
 
-		if ($context['ObjectID']) {
-			// Check if there is a dependant class
-			$dependantClass = $this->getClassConfig(str_replace("_", "\\", $context['ClassName'] ?? ''));
-			if ($dependantClass && $dependantClass["dependant_class"]) {
-				$titleField = 'Title';
-
-				if ($rc->hasMethod("getObjectSelectorTitle")) {
-					$titleField = 'getObjectSelectorTitle';
-				}
-
-				$objects = $dependantClass["dependant_class"]::get()->filter([$dependantClass["dependant_field"] => $context['ObjectID']])->Map('ID', $titleField);
-				$fields->insertAfter(
-					'ObjectID',
-					DropdownField::create(
-						'DependantObjectID',
-						_t(__CLASS__ . '.SELECT_DEPENDANT_OBJECT', 'Select a dependant object'),
-						$objects,
-						$context['DependantObjectID']
-					)->setHasEmptyDefault(true)
-				);
-			}
-		}
-
 		if ($context['RequireLinkText']) {
 			$fields->insertBefore(
 				'Description',
@@ -122,6 +100,6 @@ class DataObjectLinkFormFactory extends LinkFormFactory
 			Config::EXCLUDE_EXTRA_SOURCES
 		);
 
-		return $classes[$class];
+		return $classes[$class] ?? null;
 	}
 }

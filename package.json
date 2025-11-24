@@ -1,6 +1,6 @@
 {
   "name": "silverstripe-dataobject-links",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Adds links to data objects in TinyMCE editor",
   "author": "FLXLabs",
   "license": "BSD-3-Clause",
