@@ -3,7 +3,6 @@ import i18n from 'i18n';
 import TinyMCEActionRegistrar from 'lib/TinyMCEActionRegistrar';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { ApolloProvider } from '@apollo/client';
 import { Provider } from 'react-redux';
 import jQuery from 'jquery';
 import ShortcodeSerialiser from 'lib/ShortcodeSerialiser';
@@ -14,7 +13,7 @@ const commandName = 'sslinkdataobject';
 
 // Link to a dataobject
 TinyMCEActionRegistrar.addAction('sslink', {
-	text: i18n._t('CMS.LINKLABEL_PAGE', 'Link to an Object'),
+	text: i18n._t('TinyMCE_DataObjectLink.ButtonTitle', 'Link to an Object'),
 	onclick: (editor) => editor.execCommand(commandName),
 	priority: 53,
 }).addCommandWithUrlTest(commandName, /^\[dataobject_link.+]$/);
@@ -57,7 +56,6 @@ jQuery.entwine('ss', ($) => {
 		ReactRoot: null,
 		renderModal(isOpen) {
 			const store = ss.store;
-			const client = ss.apolloClient;
 			const handleHide = () => this.close();
 			const handleInsert = (...args) => this.handleInsert(...args);
 			const attrs = this.getOriginalAttributes();
@@ -72,23 +70,21 @@ jQuery.entwine('ss', ($) => {
 			root = ReactDOM.createRoot(this[0]);
 			// create/update the react component
 			root.render(
-				<ApolloProvider client={client}>
-					<Provider store={store}>
-						<InsertLinkDataObjectModal
-							show={isOpen}
-							isOpen={isOpen}
-							onInsert={handleInsert}
-							onHide={handleHide}
-							onClosed={handleHide}
-							title={i18n._t('CMS.LINK_PAGE', 'Link to a DataObject')}
-							bodyClassName="modal__dialog"
-							className={modalId}
-							fileAttributes={attrs}
-							identifier="Admin.InsertLinkDataObjectModal"
-							requireLinkText={requireLinkText}
-						/>
-					</Provider>
-				</ApolloProvider>,
+				<Provider store={store}>
+					<InsertLinkDataObjectModal
+						show={isOpen}
+						isOpen={isOpen}
+						onInsert={handleInsert}
+						onHide={handleHide}
+						onClosed={handleHide}
+						title={i18n._t('TinyMCE_DataObjectLink.ModalTitle', 'Link to a DataObject')}
+						bodyClassName="modal__dialog"
+						className={modalId}
+						fileAttributes={attrs}
+						identifier="Admin.InsertLinkDataObjectModal"
+						requireLinkText={requireLinkText}
+					/>
+				</Provider>,
 			);
 			this.setReactRoot(root);
 		},

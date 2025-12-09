@@ -2,19 +2,11 @@
 
 namespace FLxLabs\DataObjectLink;
 
-use SilverStripe\Core\Extension;
 use SilverStripe\Core\Convert;
 use SilverStripe\ORM\DataObject;
 
-class DataObjectLinkExtension extends Extension
+class DataObjectLinkParser
 {
-	public function updateClientConfig(&$clientConfig)
-	{
-		$clientConfig['form']['editorDataObjectLink'] = [
-			'schemaUrl' => $this->getOwner()->Link('methodSchema/Modals/editorDataObjectLink')
-		];
-	}
-
 	public static function link_shortcode_handler($arguments, $content = null, $parser = null)
 	{
 		if (!isset($arguments['id']) || !is_numeric($arguments['id']) || !isset($arguments['clazz'])) {
@@ -23,10 +15,10 @@ class DataObjectLinkExtension extends Extension
 
 		$class = str_replace('_', '\\', $arguments['clazz'] ?? '');
 		if (!class_exists($class)) {
-				return null;
+			return null;
 		}
 
-		if (!($obj = DataObject::get_by_id($class, $arguments['id']))) {
+		if (!($obj = DataObject::get($class)->byID($arguments['id']))) {
 			if (class_exists('SilverStripe\Versioned\Versioned')) {
 				$obj = \SilverStripe\Versioned\Versioned::get_latest_version($class, $arguments['id']);
 			}

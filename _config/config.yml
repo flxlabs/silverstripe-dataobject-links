@@ -5,10 +5,8 @@ After:
 ---
 SilverStripe\Admin\LeftAndMain:
   extra_requirements_javascript:
-    - 'vendor/flxlabs/silverstripe-dataobject-links/client/dist/js/sslink-dataobject-transforms.js'
-  extensions:
-    - FLXLabs\DataObjectLink\DataObjectLinkExtension
+    - 'flxlabs/silverstripe-dataobject-links:client/dist/js/sslink-dataobject-transforms.js'
 
 SilverStripe\Admin\ModalController:
-  extensions:
-    - FLXLabs\DataObjectLink\DataObjectLinkModalExtension
+  link_modal_form_factories:
+    editorDataObjectLink: FLXLabs\DataObjectLink\DataObjectLinkFormFactory
