@@ -1,113 +1,87 @@
 import Injector from 'lib/Injector';
 
+const transformPayloadId = 'admin/modals/linkModalFormSchema/editorDataObjectLink/0';
+const formName = 'Admin.InsertLinkDataObjectModal.linkModalForm/editorDataObjectLink';
+
 Injector.transform(
 	'tinymce-link-dataobject',
 	(updater) => {
-		updater.reducer('form', (originalReducer) => () => (state, { type, payload, __modified, ...more }) => {
-			if (type === 'SET_SCHEMA' && __modified) {
-				setTimeout(() => {
-					const obj = {};
-					payload.state.fields.forEach((f) => (obj[f.name] = f.value));
-					delete obj['action_insert'];
-
-					ss.store.dispatch({
-						type: '@@redux-form/INITIALIZE',
-						meta: {
-							form: 'Admin.InsertLinkDataObjectModal.editorDataObjectLink',
-							keepDirty: false,
-							keepSubmitSucceeded: true,
-						},
-						payload: obj,
-					});
-				}, 0);
-				return originalReducer(state, {
-					type,
-					payload,
-					...more,
-				});
-			}
-
+		updater.reducer('form', (originalReducer) => () => (state, { __modified, ...action }) => {
+			// The default schema does not include state override fields (which in our case are the selected class and object ID).
+			// Therefore we need to re-fetch the schema including those fields when the schema is first set.
 			if (
-				type === 'SET_SCHEMA' &&
+				action.type === 'SET_SCHEMA' &&
 				!__modified &&
-				state.formSchemas[payload.id].stateOverride &&
-				state.formSchemas[payload.id].stateOverride.fields.length > 0
+				state.formSchemas[action.payload.id].stateOverride &&
+				state.formSchemas[action.payload.id].stateOverride.fields.length > 0 &&
+				action.payload.id === transformPayloadId
 			) {
 				$.ajax({
 					type: 'GET',
-					url: payload.id,
+					url: action.payload.id,
 					headers: {
 						'x-formschema-request': 'auto,schema,state,errors',
 					},
-					data: state.formSchemas[payload.id].stateOverride.fields,
+					data: state.formSchemas[action.payload.id].stateOverride.fields,
+					success: function (data) {
+						ss.store.dispatch({
+							...action,
+							__modified: true,
+							payload: {
+								...action.payload,
+								...data,
+							},
+						});
+					},
+				});
+				return state;
+			}
+			// When the ClassName field changes, we need to re-fetch the schema to update the ObjectID field options.
+			// This is does not look like the most elegant way to achieve this, but we've found no better way yet.
+			if (action.type === '@@redux-form/CHANGE' && action.meta.form === formName && action.meta.field === 'ClassName') {
+				const schemaId = Object.keys(state.formSchemas).find((key) => state.formSchemas[key].name === action.meta.form);
+				const form = state.formSchemas[schemaId];
+				$.ajax({
+					type: 'GET',
+					url: form.id,
+					headers: {
+						'x-formschema-request': 'auto,schema,state,errors',
+					},
+					data: [
+						{
+							name: 'ClassName',
+							value: action.payload,
+						},
+					],
 					success: function (data) {
 						ss.store.dispatch({
 							type: 'SET_SCHEMA',
 							__modified: true,
 							payload: {
 								...data,
-								id: payload.id,
+								id: form.id,
 								state: {
 									...data.state,
-									// We merge the new fields with the existing ones
-									fields: data.state.fields.map((f, i) => ({
-										...payload.state.fields.find((f2) => f2.id === f.id),
-										...f,
-									})),
+									// Only override ObjectID and ClassName fields
+									fields: data.state.fields.map((f, i) =>
+										['ObjectID', 'ClassName'].includes(f.name) ? f : form.state.fields.find((f2) => f2.id === f.id),
+									),
 								},
 							},
-							...more,
+						});
+						ss.store.dispatch({
+							type: '@@redux-form/CHANGE',
+							meta: {
+								...action.meta,
+								field: 'ObjectID',
+							},
+							payload: '',
 						});
 					},
 				});
-				return state;
 			}
-
-			return originalReducer(state, {
-				type,
-				payload,
-				...more,
-			});
+			return originalReducer(state, action);
 		});
-
-		updater.form.alterSchema('Admin.InsertLinkDataObjectModal.*', (form) =>
-			form
-				.updateField('ClassName', {
-					onChange: (e, value, oldValue) => {
-						$.ajax({
-							type: 'GET',
-							url: form.schema.id,
-							headers: {
-								'x-formschema-request': 'auto,schema,state,errors',
-							},
-							data: [
-								{
-									name: 'ClassName',
-									value,
-								},
-							],
-							success: function (data) {
-								ss.store.dispatch({
-									type: 'SET_SCHEMA',
-									payload: {
-										...data,
-										id: form.schema.id,
-										state: {
-											...data.state,
-											// We merge the new fields with the existing ones
-											fields: data.state.fields.map((f, i) => ({
-												...form.schema.state.fields.find((f2) => f2.id === f.id),
-												...f,
-											})),
-										},
-									},
-								});
-							},
-						});
-					},
-				})
-				.getState(),
-		);
 	},
 	{
 		before: '*',

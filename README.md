@@ -6,6 +6,11 @@
 
 Using this module you can link to DataObjects from within TinyMCE.
 
+## Requirements
+
+- Silverstripe CMS ^6
+- silverstripe/htmleditor-tinymce ^1
+
 ## Setup
 
 You can either add this module to your composer file using

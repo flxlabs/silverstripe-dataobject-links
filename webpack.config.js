@@ -1,6 +1,5 @@
 const Path = require('path');
 const { JavascriptWebpackConfig } = require('@silverstripe/webpack-config');
-// const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const ENV = process.env.NODE_ENV;
 const PATHS = {
@@ -9,8 +8,6 @@ const PATHS = {
 	SRC: Path.resolve('client/src'),
 	DIST: Path.resolve('client/dist'),
 };
-
-console.log();
 
 const config = [
 	// Main bundle
